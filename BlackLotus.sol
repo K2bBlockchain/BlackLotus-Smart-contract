@@ -190,7 +190,7 @@ contract EscrowVault {
     * @param _endtime uint256 The request closing time 
     */
   function founderRequest(uint256 _endtime,uint256 _amount) public onlyFounder{
-    // require(_endtime>time);
+      require(_endtime>time);
       require(_amount>0);
       require(address(this).balance>_amount);
       endtime=_endtime;
@@ -208,7 +208,7 @@ contract EscrowVault {
     * @dev Backer can accept the vote request amount
     */
   function votingAccepting() public{
-     // require(endtime>=time);
+      require(endtime>=time);
       require(requestAmount>0);
       BackerState storage contribState = backerState[msg.sender];
       require(contribState.votingStatus != false);
@@ -223,7 +223,7 @@ contract EscrowVault {
     * @dev Backer can decline the vote request amount
     */
    function votingDeclining() public{
-     // require(endtime>=time);
+      require(endtime>=time);
       require(requestAmount>0);
       BackerState storage contribState = backerState[msg.sender];
       require(contribState.votingStatus==true);
@@ -240,7 +240,7 @@ contract EscrowVault {
     * @dev Founder can release the fund from wallet and amount send to the founder or backer
     */
   function enableRelease() public onlyOwner{
-    // require(endtime<=time);
+      require(endtime<=time);
       fee = uint256(SafeMath.div(SafeMath.mul(2, 95), 100));
       projectBalance = projectBalance.sub(fee);
       owner.transfer(fee);
@@ -325,7 +325,7 @@ contract EscrowVault {
   }
   
   /**
-   * @dev Throws if called by any account other than the founder.
+   * @dev Throws if called by any account other than the admin.
    */
   modifier onlyFounder() {
     require(msg.sender == founder);
