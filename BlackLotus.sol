@@ -83,9 +83,9 @@ contract Ownable {
 
 /**
  * @title EscrowVault
- * @dev This contract is used for storing funds while a crowdsale
- * is in progress. Supports refunding the money if whitelist fails,
- * and forwarding it if whitelist is successful.
+ * @dev This contract is used for storing funds while a project
+ * is in progress. Supports refunding the money if backers vote fails,
+ * and forwarding money to founder it if backers vote is successful.
  */
 contract EscrowVault {
     
