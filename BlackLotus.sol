@@ -239,7 +239,7 @@ contract EscrowVault {
    /**
     * @dev Founder can release the fund from wallet and amount send to the founder or backer
     */
-  function enableRelease() public {
+  function enableRelease() public onlyOwner{
     // require(endtime<=time);
       fee = uint256(SafeMath.div(SafeMath.mul(2, 95), 100));
       projectBalance = projectBalance.sub(fee);
@@ -274,7 +274,7 @@ contract EscrowVault {
      /**
     * @dev Founder can release the fund from wallet ofter 90 days
     */ 
-    function enableReleaseFor90Days() public {
+    function enableReleaseFor90Days() public onlyOwner{
       require(address(this).balance > 0);
       require(dayscalculation<=time);
       owner.transfer(address(this).balance);
@@ -325,10 +325,18 @@ contract EscrowVault {
   }
   
   /**
-   * @dev Throws if called by any account other than the admin.
+   * @dev Throws if called by any account other than the founder.
    */
   modifier onlyFounder() {
     require(msg.sender == founder);
+    _;
+  }
+  
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyOwner() {
+    require(msg.sender == owner);
     _;
   }
   
