@@ -115,7 +115,6 @@ contract EscrowVault {
   uint256 public projectBalance;
   uint256 public endtime;
   uint256 public requestAmount;
-  address private maxPayee;
   uint256 public backersCount;
   uint256 public refundingCount;
   uint256 public amountTransfer;
@@ -244,26 +243,16 @@ contract EscrowVault {
       fee = uint256(SafeMath.div(SafeMath.mul(2, 95), 100));
       projectBalance = projectBalance.sub(fee);
       owner.transfer(fee);
-      uint256 maxAmount=0;
-      for(uint i=0;i<payees.length;i++){
-           BackerState storage contribState = backerState[payees[i]];
-            uint256 depositedValue=contribState.depositedAmount;
-            if(maxAmount<=depositedValue){
-                maxPayee=payees[i];
-                maxAmount=depositedValue;
-            }
-         }
          
-         if(voteAcceptingPercentage > votingPercentage || backerState[maxPayee].votingStatus==true){
+         if(voteAcceptingPercentage > votingPercentage){
              state = State.Success;
-             
          }
          
          if(votingAccept.length==0 || endtime >= block.timestamp){
              state = State.Success;
          }
          
-          if(voteAcceptingPercentage < votingPercentage || backerState[maxPayee].votingStatus==false){
+          if(voteAcceptingPercentage < votingPercentage){
              state = State.Refunding;
               delete votingAccept;
               delete votingDecline;
