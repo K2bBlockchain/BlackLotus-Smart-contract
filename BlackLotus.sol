@@ -92,7 +92,7 @@ contract EscrowVault {
   using SafeMath for uint256;
   
  // Stages of the contract
- enum State { Active, Refunding, Success, Closed }
+ enum State { Active, Refunding, Success, Closed, RequestProgress }
  State public state;
   
   //Backer's Object'
@@ -115,13 +115,12 @@ contract EscrowVault {
   uint256 public projectBalance;
   uint256 public endtime;
   uint256 public requestAmount;
-  address public maxPayee;
+  address private maxPayee;
   uint256 public backersCount;
   uint256 public refundingCount;
   uint256 public amountTransfer;
   uint256 public raisedAmount;
   
-  uint256 public time = block.timestamp;
   uint256 public fee;
 
   uint256 public closingTime;
@@ -190,12 +189,13 @@ contract EscrowVault {
     * @param _endtime uint256 The request closing time 
     */
   function founderRequest(uint256 _endtime,uint256 _amount) public onlyFounder{
-      require(_endtime>time);
+      require(_endtime>block.timestamp);
       require(_amount>0);
       require(address(this).balance>_amount);
+      require(state == State.Active);
       endtime=_endtime;
       requestAmount=_amount;
-      
+      state = State.RequestProgress;
       for(uint i=0;i<payees.length;i++){
            BackerState storage contribState = backerState[payees[i]];
            uint256 depositedValue=contribState.depositedAmount;
@@ -208,7 +208,7 @@ contract EscrowVault {
     * @dev Backer can accept the vote request amount
     */
   function votingAccepting() public{
-      require(endtime>=time);
+      require(endtime>=block.timestamp);
       require(requestAmount>0);
       BackerState storage contribState = backerState[msg.sender];
       require(contribState.votingStatus != false);
@@ -223,7 +223,7 @@ contract EscrowVault {
     * @dev Backer can decline the vote request amount
     */
    function votingDeclining() public{
-      require(endtime>=time);
+      require(endtime>=block.timestamp);
       require(requestAmount>0);
       BackerState storage contribState = backerState[msg.sender];
       require(contribState.votingStatus==true);
@@ -240,7 +240,7 @@ contract EscrowVault {
     * @dev Founder can release the fund from wallet and amount send to the founder or backer
     */
   function enableRelease() public onlyOwner{
-      require(endtime<=time);
+      require(endtime<=block.timestamp);
       fee = uint256(SafeMath.div(SafeMath.mul(2, 95), 100));
       projectBalance = projectBalance.sub(fee);
       owner.transfer(fee);
@@ -259,7 +259,7 @@ contract EscrowVault {
              
          }
          
-         if(votingAccept.length==0 || endtime >= time){
+         if(votingAccept.length==0 || endtime >= block.timestamp){
              state = State.Success;
          }
          
@@ -276,7 +276,7 @@ contract EscrowVault {
     */ 
     function enableReleaseFor90Days() public onlyOwner{
       require(address(this).balance > 0);
-      require(dayscalculation<=time);
+      require(dayscalculation<=block.timestamp);
       owner.transfer(address(this).balance);
       state = State.Closed;
      }
@@ -345,7 +345,7 @@ contract EscrowVault {
    */
   modifier hasClosed {
     // solium-disable-next-line security/no-block-members
-    require( closingTime <= time);
+    require( closingTime <= block.timestamp);
     _;
   }
 
